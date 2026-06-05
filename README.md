@@ -4,8 +4,7 @@
 
 This repo provides examples of linear models, data visualization, and statistical critique (the last of which using data from the following paper:
 
---> from HW3, keeping it here as a template --> T. R. McClanahan and S. H. Shafir. 1990. "Causes and consequences of sea urchin abundance and diversity in Kenyan coral reef lagoons." _Oecologia_ 83, 362–370. doi: 10.1007/BF00317561
-)
+Lujan, E., Nielsen, R., Short, Z., Wicks, S., Nderitu Watetu, W., Malingati Khasoha, L., Palmer, T. M., Goheen, J. R., & Alston, J. M. (2023). Data, code, and metadata for: Symbiotic acacia ants drive nesting behavior by birds in an African savanna [Data set]. Zenodo. https://doi.org/10.5281/zenodo.8373322
 
 ## Data and file information
 
