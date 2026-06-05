@@ -26,3 +26,92 @@ library(readxl)
 # read in data and saved as object called `nest`
 nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
 ```
+
+# Problem 1. Research writing
+
+## a. Transparent statistical methods
+
+
+
+## b. Suggestions for rewriting
+
+
+
+## c. Further analysis
+
+
+
+# Problem 2. Data analysis
+
+## a. Clean and wrangle
+
+
+
+## b. Response variable
+
+
+
+## c. Purpose of study
+
+
+
+## d. Table of models
+
+
+
+## e. Run the models
+
+
+
+## f. Select the best model
+
+
+
+## g. Check the diagnostics
+
+
+
+## h. Visualize the model predictions
+
+
+
+## i. Write a caption for your figure
+
+
+
+## j. Calculate model predictions
+
+
+
+## k. Interpret your results
+
+
+
+# Problem 3. Affective and exploratory visualizations
+
+## a. Comparing visualizations
+
+
+
+## b. Designing an analysis
+
+
+
+## c. Check any assumptions and run your analysis
+
+
+
+## d. Create a visualization
+
+
+
+## e. Write a caption
+
+
+
+## f. Write about your results
+
+
+
+## g. Sharing your affective visualization
+
