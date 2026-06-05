@@ -1,0 +1,28 @@
+---
+title: "ENVS 193DS Final"
+date: "June 5, 2026" 
+author: "Danielle Sur" 
+format:
+  pdf:
+    toc: true
+execute:
+  message: false
+  warning: false
+---
+
+Link to GitHub repo [here](https://github.com/Knowknono/ENVS-193DS_spring-2026_final).
+
+# Set up
+
+```{r}
+#| message: false
+
+# loaded in packages
+library(tidyverse)
+library(janitor)
+library(here)
+library(readxl)
+
+# read in data and saved as object called `nest`
+nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
+```
