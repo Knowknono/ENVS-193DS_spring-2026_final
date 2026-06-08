@@ -114,9 +114,7 @@ The feedback I received during week 9 in workshop were mainly focused on making 
 
 ## b. Designing an analysis
 
-One-way ANOVA
-
-Does my reaction time differ across various kinds of exercise?
+Based on my response variable (mean reaction time in milliseconds) and chosen predictor value (exercise type), a Mann-Whitney U test can be used to analyze my data in addition to answering my question: Does my mean reaction time differ across different kinds of exercise? This analysis will compare the central tendencies of a continuous variable (mean reaction time) between two categorical variables (exercise type). 
 
 ## c. Check any assumptions and run your analysis
 
@@ -155,7 +153,7 @@ ggplot(data = rxntime_clean,
   facet_wrap(~ exercise_type)
 ```
 
-The variable of interest is normally distributed because most of the points (save for a handful of outliers) follow an upward, linear trend somewhat closely.
+The sample sizes are small and distributions border on non-normality, so a Mann-Whitney U test is appropriate for this data.
 
 ### Check 2 - Variances
 
@@ -174,6 +172,15 @@ var.test(
   reaction_time_avg_ms ~ exercise_type,
   # rxntime_clean data frame
   data = rxntime_clean)
+```
+
+### Running the analysis
+
+```{r}
+wilcox.test(
+  reaction_time_avg_ms ~ exercise_type,
+  data = rxntime_clean
+)
 ```
 
 ## d. Create a visualization
