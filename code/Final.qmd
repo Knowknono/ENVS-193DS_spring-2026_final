@@ -1,6 +1,6 @@
 ---
 title: "ENVS 193DS Final"
-date: "June 5, 2026" 
+date: "June 7, 2026" 
 author: "Danielle Sur" 
 format:
   pdf:
@@ -25,19 +25,32 @@ library(readxl)
 
 # read in data and saved as object called `nest`
 nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
+
+# read in data and saved as object called `rxntime`
+rxntime   <- readr::read_csv(here::here("data","rxntime.csv"))
 ```
 
 # Problem 1. Research writing
 
 ## a. Transparent statistical methods
 
-
+In part 1, they used linear regression. In part 2, they used a chi-square test of independence.
 
 ## b. Suggestions for rewriting
 
+Part 1. We found that the distance of microhabitat to water edge predicts the likelihood of usage by American Avocets.
 
+Part 2. We found that the relationship between bird species (American Avocet, Forster’s Tern, Black-necked Stilt) and habitat type (managed pond, non-tidal marsh, salt pond, tidal marsh, or tidal mudflat) is statistically significant.
+
+We found that the prevalence of bird species (American Avocet, Forster’s Tern, Black-necked Stilt) differ significantly by habitat type (managed pond, non-tidal marsh, salt pond, tidal marsh, or tidal mudflat).
+
+OR
+
+We found that different bird species (American Avocet, Forster’s Tern, Black-necked Stilt) show preference for certain habitat types (managed pond, non-tidal marsh, salt pond, tidal marsh, or tidal mudflat).
 
 ## c. Further analysis
+
+Predation pressure can be studied as a discrete variable (count of individuals); the presence of predators could make microhabitats too risky for the birds to frequent safely. As such, the birds may choose to avoid predator territories, reducing the probability of American Avocet microhabitat use in those locations. Predator data may be acquired through methods such as tracking, video sightings/ identification, and/ or direct observation.
 
 
 
@@ -91,7 +104,7 @@ nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
 
 ## a. Comparing visualizations
 
-
+The exploratory visualizations I made in Homework
 
 ## b. Designing an analysis
 
@@ -103,7 +116,55 @@ nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
 
 ## d. Create a visualization
 
+### Cleaning data
 
+```{r}
+# created a new object from rxntime
+rxntime_box <- rxntime |>
+  # cleaned column names
+  clean_names() |>
+  # selected columns of interest
+  select(exercise_type, reaction_time_avg_ms) |>
+  # capitalized existing abbreviations
+  mutate(exercise_type = case_when(
+    exercise_type == "volleyball" ~ "Volleyball",
+    exercise_type == "biking"    ~ "Biking",
+    exercise_type == "walking"   ~ "Walking")) |>
+  # removed missing values
+  drop_na()
+```
+
+### Visualization
+
+```{r}
+# base layer: ggplot
+ggplot(data = rxntime_box,
+       # x-axis: exercise type
+       # y-axis: mean reaction time
+       # color by exercise type
+       mapping = aes(x = exercise_type,
+                     y = reaction_time_avg_ms,
+                     color = exercise_type)) +
+  # first layer: boxplot
+  geom_boxplot() +
+  # second layer: data points and jitter
+  geom_jitter(width = 0.15,
+              height = 0) +
+  labs(title = "Exercise Type and Reaction Time",
+       x = "Exercise Type",
+       y = "Mean Reaction Time (ms)") +
+  # custom theme
+  theme_minimal() +
+  # removed legend
+  theme(legend.position = "none") +
+  # custom colors
+  scale_color_manual(values = c("Biking" = "tomato",
+                                "Volleyball" = "dodgerblue",
+                                "Walking" = "green3")) +
+  # removed grid and axis lines
+  theme(panel.grid = element_blank(),
+        axis.line = element_blank())
+```
 
 ## e. Write a caption
 
@@ -115,3 +176,4 @@ nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
 
 ## g. Sharing your affective visualization
 
+I was there :)
