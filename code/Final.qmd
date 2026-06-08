@@ -1,6 +1,6 @@
 ---
 title: "ENVS 193DS Final"
-date: "June 7, 2026" 
+date: "June 8, 2026" 
 author: "Danielle Sur" 
 format:
   pdf:
@@ -104,15 +104,77 @@ Predation pressure can be studied as a discrete variable (count of individuals);
 
 ## a. Comparing visualizations
 
-The exploratory visualizations I made in Homework
+In the affective visualization from Homework 3, each observation is represented by an icon, resulting in an array of 30 icons. The exploratory visualizations I made in Homework 2 were plotted so that the response variable (mean reaction time in milliseconds) would be on the y-axes and the predictor variables (exercise duration in minutes for the scatter plot and exercise type for the strip plot) would be on the x-axes. Observations were denoted with points (in the strip plot, points were assigned unique colors by exercise type).
+
+Between all my visualizations, a common feature they share is a round, circular representation for observations. In the exploratory visualizations, these are the plotted points, while the affective visualization is made up of round volleyball and bike tire icons. Other than visual elements, the plots share the same response variable (mean reaction time in milliseconds). The strip plot and affective visualization both present information framed by the categories of exercise type.
+
+Starting with exploratory visualizations, the strip plot displays a wide range of response values for biking and a more narrow range for volleyball (due to the lower observation count). The data collection incomplete at the time, it was hard to tell if there was a difference in central tendency for mean reaction time between the groups. The scatter plot was similarly difficult to draw concrete statements from due to low observation counts. Most points were concentrated in shorter durations around 7 minutes because I'd collected more data focused on biking (and biking took less time than volleyball sessions). Taking this into account, the negative trend shown in the plot can be understood as a very vague pattern. And in the affective visualization, volleyball and biking appeared to be the most frequent activities based on the number of icons, while volleyball activities involved the most social interaction. Patterns are different between visualizations because I had attempted to highlight a different finding through each figure.
+
+The feedback I received during week 9 in workshop were mainly focused on making an artistic (affective) visualization because at the time I did not have one. I was also encouraged to record more data. My group's comments motivated me to create a visualization that was easy to understand and that would clearly communicate my findings. With their suggestions in mind, I went with an array of icons that would signal different factors such as socialization and hydration with additional colors and smaller icons.
 
 ## b. Designing an analysis
 
+One-way ANOVA
 
+Does my reaction time differ across various kinds of exercise?
 
 ## c. Check any assumptions and run your analysis
 
+### Cleaning data
 
+```{r}
+rxntime_clean <- rxntime |> 
+  clean_names() |> 
+  filter(exercise_type != "walking")
+```
+
+### Check 1 - Assessing normality with histograms
+
+```{r}
+ggplot(data = rxntime_clean,
+       mapping = aes(x = reaction_time_avg_ms,
+                     fill = exercise_type)) +
+  geom_histogram(bins = 6,
+                 color = "black") +
+  facet_wrap( ~ exercise_type) +
+  theme_minimal()
+```
+
+### Check 1 - Assessing normality with QQ plots
+
+```{r}
+# base layer: ggplot
+ggplot(data = rxntime_clean,
+       # y-axis: mean reaction time
+       mapping = aes(sample = reaction_time_avg_ms)) +
+  # first later: reference line
+  geom_qq_line(color = "black") +
+  # second layer: QQ points
+  geom_qq() +
+  # created new panels for each exercise type
+  facet_wrap(~ exercise_type)
+```
+
+The variable of interest is normally distributed because most of the points (save for a handful of outliers) follow an upward, linear trend somewhat closely.
+
+### Check 2 - Variances
+
+```{r}
+rxntime_clean |> 
+  group_by(exercise_type) |> 
+  summarize(variance = var(reaction_time_avg_ms)) |> 
+  ungroup()
+
+# (gut check) ratio of variances
+1059/368
+
+# (statistical check) F-test of equal variances
+var.test(
+  # response variable ~ grouping variable
+  reaction_time_avg_ms ~ exercise_type,
+  # rxntime_clean data frame
+  data = rxntime_clean)
+```
 
 ## d. Create a visualization
 
@@ -168,7 +230,8 @@ ggplot(data = rxntime_box,
 
 ## e. Write a caption
 
-
+**Figure 1. Mean reaction times across three exercise types.**
+Box/ jitter plots of mean reaction times (ms) for three exercise types (red: biking, blue: volleyball, green: walking). Interquartile ranges fall around 260-310 milliseconds and median values are 295, 287, and 272 milliseconds for biking, volleyball, and walking, respectively. Points represent individual observations. Data are from my personal observations throughout the spring quarter. 
 
 ## f. Write about your results
 
