@@ -23,6 +23,7 @@ library(janitor)
 library(here)
 library(readxl)
 library(dplyr)
+library(effsize)
 
 # read in data and saved as object called `nest`
 nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
@@ -108,14 +109,14 @@ Tree height is a continuous variable, whereas ant species is a categorical varia
 ## e. Run the models
 
 ```{r}
-# model 1: tree height and ant species w/ interaction term
+# model 1: tree height and ant species w/ interaction
 model1 <- glm(
   case_control ~ height_cm * ant_species,
   data = nests_clean,
   family = "binomial"
 )
 
-# model 2: tree height and ant species w/o interaction term
+# model 2: tree height and ant species w/o interaction
 model2 <- glm(
   case_control ~ height_cm + ant_species,
   data = nests_clean,
@@ -204,7 +205,7 @@ wilcox.test(
 
 ```{r}
 # calculated effect size using clean data frame
-cliffs_delta(
+cliff.delta(
   reaction_time_avg_ms ~ exercise_type,
   data = rxntime_clean
 )
