@@ -1,6 +1,6 @@
 ---
 title: "ENVS 193DS Final"
-date: "June 8, 2026" 
+date: "June 9, 2026" 
 author: "Danielle Sur" 
 format:
   pdf:
@@ -22,6 +22,7 @@ library(tidyverse)
 library(janitor)
 library(here)
 library(readxl)
+library(dplyr)
 
 # read in data and saved as object called `nest`
 nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
@@ -52,25 +53,59 @@ We found that different bird species (American Avocet, Forster’s Tern, Black-n
 
 Predation pressure can be studied as a discrete variable (count of individuals); the presence of predators could make microhabitats too risky for the birds to frequent safely. As such, the birds may choose to avoid predator territories, reducing the probability of American Avocet microhabitat use in those locations. Predator data may be acquired through methods such as tracking, video sightings/ identification, and/ or direct observation.
 
+categorical or continuous
+
 
 
 # Problem 2. Data analysis
 
 ## a. Clean and wrangle
 
+```{r}
+# created new object from nest data frame
+nests_clean <- nest |> 
+  # selected columns of interest
+  select(height_cm, ant_species, case_control) |>
+  # filtered ant species
+  filter(
+    ant_species == "AB" |
+    ant_species == "RRB" |
+    ant_species == "BBR") |> 
+  # reordered the levels of ant species
+  mutate(ant_species = factor(ant_species,
+                          levels = c("AB",
+                                     "RRB",
+                                     "BBR"))) |> 
+  # created a new column to store ant scientific names
+  mutate(ant_species = case_when(
+    ant_species == "AB" ~ "Crematogaster sjostedti",
+    ant_species == "RRB" ~ "Crematogaster mimosae",
+    ant_species == "BBR" ~ "Crematogaster nigriceps"))
 
+# display of data in a sliced sample
+slice_sample(nests_clean,
+             n = 10,
+             by = NULL,
+             weight_by = NULL,
+             replace = FALSE)
+```
 
 ## b. Response variable
 
-
+A tree that contained a nest ("used" tree) is denoted with a (1) and trees without nests ("available" trees) are denoted with a (0).
 
 ## c. Purpose of study
 
-
+Tree height is a continuous variable, whereas ant species is a categorical variable. Trees that are taller may be older and harder to reach, offering more security for birds avoiding disturbance caused by "catastrophic (lethal) herbivory" and in turn, increasing the probability of probability of nest occurrence (Introduction, paragraph 2). The probability of probability of nest occurrence may differ depending on the aggressive tendencies (or lack thereof) of the ant species that has colonized the tree. More aggression to protect the tree may benefit birds' nests from herbivory disturbance, but it may also put the birds and their offspring at risk of attack by hostile ants (Introduction, paragraph 3).
 
 ## d. Table of models
 
-
+| Model number | Tree height | Ant species | Model description           |
+|--------------|-------------|-------------|-----------------------------|
+| 0            |             |             | no predictors (null model)  |
+| 1            |      x      |      x      | all predictors (full model) |
+| 2            |      x      |             | tree height
+| 3            |             |      x      | ant species
 
 ## e. Run the models
 
@@ -121,12 +156,15 @@ Based on my response variable (mean reaction time in milliseconds) and chosen pr
 ### Cleaning data
 
 ```{r}
+# created new object from rxntime data frame
 rxntime_clean <- rxntime |> 
+  # cleaned names
   clean_names() |> 
+  # filtered exercise types to exclude walking (insufficient data)
   filter(exercise_type != "walking")
 ```
 
-### Check 1 - Assessing normality with histograms
+### Checking assumptions - Assessing normality with histograms
 
 ```{r}
 ggplot(data = rxntime_clean,
@@ -138,46 +176,23 @@ ggplot(data = rxntime_clean,
   theme_minimal()
 ```
 
-### Check 1 - Assessing normality with QQ plots
-
-```{r}
-# base layer: ggplot
-ggplot(data = rxntime_clean,
-       # y-axis: mean reaction time
-       mapping = aes(sample = reaction_time_avg_ms)) +
-  # first later: reference line
-  geom_qq_line(color = "black") +
-  # second layer: QQ points
-  geom_qq() +
-  # created new panels for each exercise type
-  facet_wrap(~ exercise_type)
-```
-
-The sample sizes are small and distributions border on non-normality, so a Mann-Whitney U test is appropriate for this data.
-
-### Check 2 - Variances
-
-```{r}
-rxntime_clean |> 
-  group_by(exercise_type) |> 
-  summarize(variance = var(reaction_time_avg_ms)) |> 
-  ungroup()
-
-# (gut check) ratio of variances
-1059/368
-
-# (statistical check) F-test of equal variances
-var.test(
-  # response variable ~ grouping variable
-  reaction_time_avg_ms ~ exercise_type,
-  # rxntime_clean data frame
-  data = rxntime_clean)
-```
+Distributions are similarly right-skewed and data were randomly sampled, so a Mann-Whitney U test is appropriate for this data.
 
 ### Running the analysis
 
 ```{r}
+# Mann-Whitney U test using clean data frame
 wilcox.test(
+  reaction_time_avg_ms ~ exercise_type,
+  data = rxntime_clean
+)
+```
+
+### Calculating effect size
+
+```{r}
+# calculated effect size using clean data frame
+cliffs_delta(
   reaction_time_avg_ms ~ exercise_type,
   data = rxntime_clean
 )
@@ -192,13 +207,13 @@ wilcox.test(
 rxntime_box <- rxntime |>
   # cleaned column names
   clean_names() |>
+  filter(exercise_type != "walking") |> 
   # selected columns of interest
   select(exercise_type, reaction_time_avg_ms) |>
   # capitalized existing abbreviations
   mutate(exercise_type = case_when(
     exercise_type == "volleyball" ~ "Volleyball",
-    exercise_type == "biking"    ~ "Biking",
-    exercise_type == "walking"   ~ "Walking")) |>
+    exercise_type == "biking"    ~ "Biking")) |>
   # removed missing values
   drop_na()
 ```
@@ -217,8 +232,10 @@ ggplot(data = rxntime_box,
   # first layer: boxplot
   geom_boxplot() +
   # second layer: data points and jitter
-  geom_jitter(width = 0.15,
-              height = 0) +
+  geom_jitter(width = 0.15,  # range of horizontal jitter
+              height = 0,    # no vertical jitter
+              alpha = 0.5) + # lowered opacity of raw data
+  # relabeled x and y axes, added a title
   labs(title = "Exercise Type and Reaction Time",
        x = "Exercise Type",
        y = "Mean Reaction Time (ms)") +
@@ -228,8 +245,7 @@ ggplot(data = rxntime_box,
   theme(legend.position = "none") +
   # custom colors
   scale_color_manual(values = c("Biking" = "tomato",
-                                "Volleyball" = "dodgerblue",
-                                "Walking" = "green3")) +
+                                "Volleyball" = "dodgerblue")) +
   # removed grid and axis lines
   theme(panel.grid = element_blank(),
         axis.line = element_blank())
@@ -238,12 +254,14 @@ ggplot(data = rxntime_box,
 ## e. Write a caption
 
 **Figure 1. Mean reaction times across three exercise types.**
-Box/ jitter plots of mean reaction times (ms) for three exercise types (red: biking, blue: volleyball, green: walking). Interquartile ranges fall around 260-310 milliseconds and median values are 295, 287, and 272 milliseconds for biking, volleyball, and walking, respectively. Points represent individual observations. Data are from my personal observations throughout the spring quarter. 
+Box/ jitter plots of mean reaction times (ms) for three exercise types (red: biking, blue: volleyball). Interquartile ranges fall around 260-310 milliseconds and median values are 295 and 287 milliseconds for biking and volleyball, respectively. Points represent individual observations. Data are from my personal observations throughout the spring quarter. 
 
 ## f. Write about your results
 
-
+We found no statistically significant difference in median reaction times between volleyball (median = 287 ms, n = 13) and biking (median = 295 ms, n = 16) exercises (Wilcoxon rank-sum test, W = 109.5, p = 0.83, $\alpha$ = 0.05). There was a small (Cliff's $\delta$ = 0.05) difference in median reaction times between exercise types.
 
 ## g. Sharing your affective visualization
 
-I was there :)
+I was there that day
+Cool visualizations
+Everywhere, they were
