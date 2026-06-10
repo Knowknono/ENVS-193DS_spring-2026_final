@@ -100,16 +100,28 @@ Tree height is a continuous variable, whereas ant species is a categorical varia
 
 ## d. Table of models
 
-| Model number | Tree height | Ant species | Model description           |
-|--------------|-------------|-------------|-----------------------------|
-| 0            |             |             | no predictors (null model)  |
-| 1            |      x      |      x      | all predictors (full model) |
-| 2            |      x      |             | tree height
-| 3            |             |      x      | ant species
+| Model number | Tree height | Ant species | Model description            |
+|--------------|-------------|-------------|------------------------------|
+| 1            |      x      |      x      | model with interaction term  |
+| 2            |      x      |      x      | model w/o interaction term   |
 
 ## e. Run the models
 
+```{r}
+# model 1: tree height and ant species w/ interaction term
+model1 <- glm(
+  case_control ~ height_cm * ant_species,
+  data = nests_clean,
+  family = "binomial"
+)
 
+# model 2: tree height and ant species w/o interaction term
+model2 <- glm(
+  case_control ~ height_cm + ant_species,
+  data = nests_clean,
+  family = "binomial"
+)
+```
 
 ## f. Select the best model
 
