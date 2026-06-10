@@ -239,16 +239,24 @@ ggplot(nests_vis,
 
 ## i. Write a caption for your figure
 
-**Figure 1. Predicted probability of nest presence increases with tree height across ant species.**
-Open circles represent individual tree observations. Predicted probabilities of nests are graded on a scale of 0-1, with 0 indicating no nest and 1 indicating the presence of a nest, although points are jittered for visual clarity. Panels depict different ant species that colonize the trees (pink: C. sjostedti, yellow: C. mimosae, blue: C. nigriceps). Ribbon depicts the upper and lower bounds of the confidence interval, and line represents the predicted probability of nest presence. Data source: Lujan, E.; Nielsen, R.; Short, Z.; Wicks, S.; Nderitu Watetu, W.; Malingati Khasoha, L.; Palmer, T. M.; Goheen, J. R.; & Alston, J. M. (2023). Data from: Symbiotic acacia ants drive nesting behavior by birds in an African savanna [Data set]. Zenodo. [https://doi.org/10.5281/zenodo.8373322](https://doi.org/10.5281/zenodo.8373322)
+**Figure 1. Predicted probability of nest occurrence increases with tree height across ant species.**
+Open circles represent individual tree observations. Predicted probabilities of nests are graded on a scale of 0-1, with 0 indicating no nest and 1 indicating the occurrence of a nest, although points are jittered for visual clarity. Panels depict different ant species that colonize the trees (pink: C. sjostedti, yellow: C. mimosae, blue: C. nigriceps). Ribbon depicts the upper and lower bounds of the confidence interval, and line represents the predicted probability of nest occurrence Data source: Lujan, E.; Nielsen, R.; Short, Z.; Wicks, S.; Nderitu Watetu, W.; Malingati Khasoha, L.; Palmer, T. M.; Goheen, J. R.; & Alston, J. M. (2023). Data from: Symbiotic acacia ants drive nesting behavior by birds in an African savanna [Data set]. Zenodo. [https://doi.org/10.5281/zenodo.8373322](https://doi.org/10.5281/zenodo.8373322)
 
 ## j. Calculate model predictions
 
+```{r}
+# created an object for the tallest tree in the dataset
+height_600 <- ggpredict(model1,
+                        terms = c("height_cm [600]", # probability of nest occurrence at 600 cm
+                                  "ant_species")) # probability by ant species
 
+# displayed data
+height_600
+```
 
 ## k. Interpret your results
 
-
+Tree height and ant species interact to predict probability of probability of bird nest occurrence in African savanna. At a tree height of 600 cm, predicted nest occurrence probability is 1.00 (95% CI: [1.00,1.00]) for C. nigriceps, 0.74 (95% CI: [0.48,0.90]) for C. mimosae, and 0.20 (95% CI: [0.00, 0.99]) for C. sjostedti. These findings are reflected in Figure 2, where trees colonized with C. nigriceps have the highest predicted nest occurrences and trees colonized with C. sjostedti have the lowest predicted nest occurrences.
 
 # Problem 3. Affective and exploratory visualizations
 
