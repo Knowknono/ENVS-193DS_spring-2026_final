@@ -2,7 +2,7 @@
 
 ## General information
 
-This repo provides examples of linear models, data visualization, and statistical critique (the last of which using data from the following paper:
+This repo is comprised of research writing, linear model, and personal project data analysis. Linear model data comes from the following source:
 
 Lujan, E., Nielsen, R., Short, Z., Wicks, S., Nderitu Watetu, W., Malingati Khasoha, L., Palmer, T. M., Goheen, J. R., & Alston, J. M. (2023). Data, code, and metadata for: Symbiotic acacia ants drive nesting behavior by birds in an African savanna [Data set]. Zenodo. https://doi.org/10.5281/zenodo.8373322
 
@@ -10,7 +10,7 @@ Lujan, E., Nielsen, R., Short, Z., Wicks, S., Nderitu Watetu, W., Malingati Khas
 
 There is a `data` folder in which data files are stored.
 
-There is a `code` folder in which all code for linear models are stored.
+There is a `code` folder in which all coding files are stored.
 
 ## Rendered output
 
