@@ -29,7 +29,7 @@ library(MuMIn)
 library(DHARMa)
 library(ggeffects)
 
-d# read in data and saved as object called `nest`
+# read in data and saved as object called `nest`
 nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
 
 # read in data and saved as object called `rxntime`
@@ -163,64 +163,84 @@ plot(
 ```{r}
 # stored custom colors
 my_cols <- c(
-  "Crematogaster sjostedti" = "tomato",
-  "Crematogaster mimosae"   = "green4",
-  "Crematogaster nigriceps" = "dodgerblue"
+  "Crematogaster sjostedti" = "hotpink",
+  "Crematogaster mimosae"   = "gold3",
+  "Crematogaster nigriceps" = "cyan2"
 )
 ```
 
 ```{r}
 # predictions by ant species and tree height
 mod_preds <- ggpredict(model1, terms = c("height_cm [all]",
-                                         "ant_species"))
+                                         "ant_species")) |>
+  # matched model predictions and geom_point column names
+  rename(ant_species = group)
+
+# aligned factor levels with raw data
+mod_preds$ant_species <- factor(mod_preds$ant_species,
+                                levels =
+                                  levels(nests_clean$ant_species))
+
+# matched my_cols to factor levels
+names(my_cols) <- levels(nests_clean$ant_species)
+```
+
+```{r}
+# created new object from nests_clean
+nests_vis <- nests_clean |> 
+  # filtered case_control columns
+  filter(!is.na(case_control) & case_control == c(0,1))
 
 # base layer: ggplot using clean data frame
-ggplot(nests_clean,
+ggplot(nests_vis,
        # x-axis: tree height
        # y-axis: predicted probability of nest
        aes(x = height_cm,
            y = case_control)) +
   # first layer: raw data points
-  geom_point(alpha = 0.2, # point opacity
-             size = 1) + # point size
+  geom_jitter(aes(color = ant_species), # color by ant species
+              height = 0.02, # jitter height
+              alpha = 0.4, # point opacity
+              size = 2, # point size
+              shape = 21) + # point shape
   # second layer: ribbon from predictions
-  geom_ribbon(data = mod_preds,
-              aes(x = x,
-                  ymin = conf.low,
-                  ymax = conf.high,
-                  fill = group),
-              inherit.aes = FALSE,
-              alpha = 0.25) +
+  geom_ribbon(data = mod_preds, # model predictions data
+              aes(x = x, # model predictions x-axis
+                  ymin = conf.low, # confidence low
+                  ymax = conf.high, # confidence high
+                  fill = ant_species), # color by ant species
+              inherit.aes = FALSE, # reject default aesthetics
+              alpha = 0.3) + # ribbon opacity
   # third layer: line from predictions
-  geom_line(data = mod_preds,
-            aes(x = x,
-                y = predicted,
-                color = group),
-            inherit.aes = FALSE,
-            linewidth = 1) +
-  # separated models by ant species (group)
-  facet_wrap(~ group) +
-  # applied custom colors
+  geom_line(data = mod_preds, # model predictions data
+            aes(x = x, # model predictions x-axis
+                y = predicted, # model predictions y-axis
+                color = ant_species), # color by ant species
+            inherit.aes = FALSE, # reject default aesthetics
+            linewidth = 1) + # line thickness
+  facet_wrap(~ ant_species) + # facet by the same variable
+  # used custom colors
   scale_color_manual(values = my_cols) +
   # filled with custom colors
   scale_fill_manual(values = my_cols) +
-  # set y-axis range to 0-1
-  scale_y_continuous(limits = c(0,1)) +
+  # limited y-axis range to 0-1
+  coord_cartesian(ylim = c(0,1)) +
   labs(x = "Tree height (cm)", # relabeled x-axis
-       y = "Predicted probability of nest", # relabeled y-axis
+       y = "Predicted probability of nest",
        title = "Tree height and ant species effects") + # added title
   # custom theme
   theme_minimal() +
   # removed legend
-  theme(legend.position = "none",
-        panel.background = element_blank(), # removing panel background
-        panel.grid = element_blank(), # removing panel grid
+  theme(legend.position = "none", # removed legend
+        panel.background = element_blank(), # removed panel background
+        panel.grid = element_blank(), # removed panel grid
   )
 ```
 
 ## i. Write a caption for your figure
 
-
+**Figure 1. Predicted probability of nest presence increases with tree height across ant species.**
+Open circles represent individual tree observations. Predicted probabilities of nests are graded on a scale of 0-1, with 0 indicating no nest and 1 indicating the presence of a nest, although points are jittered for visual clarity. Panels depict different ant species that colonize the trees (pink: C. sjostedti, yellow: C. mimosae, blue: C. nigriceps). Ribbon depicts the upper and lower bounds of the confidence interval, and line represents the predicted probability of nest presence. Data source: Lujan, E.; Nielsen, R.; Short, Z.; Wicks, S.; Nderitu Watetu, W.; Malingati Khasoha, L.; Palmer, T. M.; Goheen, J. R.; & Alston, J. M. (2023). Data from: Symbiotic acacia ants drive nesting behavior by birds in an African savanna [Data set]. Zenodo. [https://doi.org/10.5281/zenodo.8373322](https://doi.org/10.5281/zenodo.8373322)
 
 ## j. Calculate model predictions
 
@@ -348,7 +368,7 @@ ggplot(data = rxntime_box,
 
 ## e. Write a caption
 
-**Figure 1. Mean reaction times across three exercise types.**
+**Figure 2. Mean reaction times across three exercise types.**
 Box/ jitter plots of mean reaction times (ms) for three exercise types (red: biking, blue: volleyball). Interquartile ranges fall around 260-310 milliseconds and median values are 295 and 287 milliseconds for biking and volleyball, respectively. Points represent individual observations. Data are from my personal observations throughout the spring quarter. 
 
 ## f. Write about your results
