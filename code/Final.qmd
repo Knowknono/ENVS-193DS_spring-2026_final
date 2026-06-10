@@ -21,11 +21,15 @@ Link to GitHub repo [here](https://github.com/Knowknono/ENVS-193DS_spring-2026_f
 library(tidyverse)
 library(janitor)
 library(here)
+library(ggplot2)
 library(readxl)
 library(dplyr)
 library(effsize)
+library(MuMIn)
+library(DHARMa)
+library(ggeffects)
 
-# read in data and saved as object called `nest`
+d# read in data and saved as object called `nest`
 nest   <- readr::read_csv(here::here("data","nest_data_final.csv"))
 
 # read in data and saved as object called `rxntime`
@@ -83,6 +87,13 @@ nests_clean <- nest |>
     ant_species == "RRB" ~ "Crematogaster mimosae",
     ant_species == "BBR" ~ "Crematogaster nigriceps"))
 
+# converted ant species to factor
+nests_clean$ant_species <- factor(
+  nests_clean$ant_species,
+  levels = c("Crematogaster sjostedti",
+             "Crematogaster mimosae",
+             "Crematogaster nigriceps"))
+
 # display of data in a sliced sample
 slice_sample(nests_clean,
              n = 10,
@@ -126,15 +137,86 @@ model2 <- glm(
 
 ## f. Select the best model
 
+```{r}
+# used AIC to choose the best model
+AICc(
+  model1, # interaction
+  model2 # no interaction
+)
+```
 
+The best model as determined by Akaike’s Information Criterion (AIC) is the one that includes tree height and water treatment (with interaction terms) as predictors.
 
 ## g. Check the diagnostics
 
-
+```{r}
+#| fig-height: 6
+#| fig-width: 8
+# simulated residuals
+plot(
+  simulateResiduals(model1)
+)
+```
 
 ## h. Visualize the model predictions
 
+```{r}
+# stored custom colors
+my_cols <- c(
+  "Crematogaster sjostedti" = "tomato",
+  "Crematogaster mimosae"   = "green4",
+  "Crematogaster nigriceps" = "dodgerblue"
+)
+```
 
+```{r}
+# predictions by ant species and tree height
+mod_preds <- ggpredict(model1, terms = c("height_cm [all]",
+                                         "ant_species"))
+
+# base layer: ggplot using clean data frame
+ggplot(nests_clean,
+       # x-axis: tree height
+       # y-axis: predicted probability of nest
+       aes(x = height_cm,
+           y = case_control)) +
+  # first layer: raw data points
+  geom_point(alpha = 0.2, # point opacity
+             size = 1) + # point size
+  # second layer: ribbon from predictions
+  geom_ribbon(data = mod_preds,
+              aes(x = x,
+                  ymin = conf.low,
+                  ymax = conf.high,
+                  fill = group),
+              inherit.aes = FALSE,
+              alpha = 0.25) +
+  # third layer: line from predictions
+  geom_line(data = mod_preds,
+            aes(x = x,
+                y = predicted,
+                color = group),
+            inherit.aes = FALSE,
+            linewidth = 1) +
+  # separated models by ant species (group)
+  facet_wrap(~ group) +
+  # applied custom colors
+  scale_color_manual(values = my_cols) +
+  # filled with custom colors
+  scale_fill_manual(values = my_cols) +
+  # set y-axis range to 0-1
+  scale_y_continuous(limits = c(0,1)) +
+  labs(x = "Tree height (cm)", # relabeled x-axis
+       y = "Predicted probability of nest", # relabeled y-axis
+       title = "Tree height and ant species effects") + # added title
+  # custom theme
+  theme_minimal() +
+  # removed legend
+  theme(legend.position = "none",
+        panel.background = element_blank(), # removing panel background
+        panel.grid = element_blank(), # removing panel grid
+  )
+```
 
 ## i. Write a caption for your figure
 
@@ -275,6 +357,6 @@ We found no statistically significant difference in median reaction times betwee
 
 ## g. Sharing your affective visualization
 
-I was there that day
-Cool visualizations
-Everywhere, they were
+I was there that day  
+Lovely visualizations  
+Everywhere, outside
