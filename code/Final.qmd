@@ -40,27 +40,17 @@ rxntime   <- readr::read_csv(here::here("data","rxntime.csv"))
 
 ## a. Transparent statistical methods
 
-In part 1, they used linear regression. In part 2, they used a chi-square test of independence.
+In part 1, they used logistic regression. In part 2, they used a chi-square test of independence.
 
 ## b. Suggestions for rewriting
 
 Part 1. We found that the distance of microhabitat to water edge predicts the likelihood of usage by American Avocets.
 
-Part 2. We found that the relationship between bird species (American Avocet, Forster’s Tern, Black-necked Stilt) and habitat type (managed pond, non-tidal marsh, salt pond, tidal marsh, or tidal mudflat) is statistically significant.
-
-We found that the prevalence of bird species (American Avocet, Forster’s Tern, Black-necked Stilt) differ significantly by habitat type (managed pond, non-tidal marsh, salt pond, tidal marsh, or tidal mudflat).
-
-OR
-
-We found that different bird species (American Avocet, Forster’s Tern, Black-necked Stilt) show preference for certain habitat types (managed pond, non-tidal marsh, salt pond, tidal marsh, or tidal mudflat).
+Part 2. We found that different bird species (American Avocet, Forster’s Tern, Black-necked Stilt) show preference for certain habitat types (managed pond, non-tidal marsh, salt pond, tidal marsh, or tidal mudflat).
 
 ## c. Further analysis
 
-Predation pressure can be studied as a discrete variable (count of individuals); the presence of predators could make microhabitats too risky for the birds to frequent safely. As such, the birds may choose to avoid predator territories, reducing the probability of American Avocet microhabitat use in those locations. Predator data may be acquired through methods such as tracking, video sightings/ identification, and/ or direct observation.
-
-categorical or continuous
-
-
+Predation pressure can be studied as a discrete variable (count of individuals) or as a categorical variable (levels of predator population density); the presence of predators could make microhabitats too risky for the birds to frequent safely. As such, the birds may choose to avoid predator territories, reducing the probability of American Avocet microhabitat use in those locations. Predator data may be acquired through methods such as tracking, video sightings/ identification, and/ or direct observation.
 
 # Problem 2. Data analysis
 
@@ -120,6 +110,11 @@ Tree height is a continuous variable, whereas ant species is a categorical varia
 ## e. Run the models
 
 ```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| error: false
+
 # model 1: tree height and ant species w/ interaction
 model1 <- glm(
   case_control ~ height_cm * ant_species,
@@ -139,10 +134,11 @@ model2 <- glm(
 
 ```{r}
 # used AIC to choose the best model
-AICc(
+# made output invisible
+invisible(AICc(
   model1, # interaction
   model2 # no interaction
-)
+))
 ```
 
 The best model as determined by Akaike’s Information Criterion (AIC) is the one that includes tree height and water treatment (with interaction terms) as predictors.
@@ -247,7 +243,7 @@ Open circles represent individual tree observations. Predicted probabilities of 
 ```{r}
 # created an object for the tallest tree in the dataset
 height_600 <- ggpredict(model1,
-                        terms = c("height_cm [600]", # probability of nest occurrence at 600 cm
+                        terms = c("height_cm [600]", # occurrence at 600 cm
                                   "ant_species")) # probability by ant species
 
 # displayed data
@@ -290,12 +286,17 @@ rxntime_clean <- rxntime |>
 ### Checking assumptions - Assessing normality with histograms
 
 ```{r}
+# base layer: ggplot using clean data frame
 ggplot(data = rxntime_clean,
+       # x-axis: mean reaction time
+       # fill color by exercise type
        mapping = aes(x = reaction_time_avg_ms,
                      fill = exercise_type)) +
-  geom_histogram(bins = 6,
-                 color = "black") +
-  facet_wrap( ~ exercise_type) +
+  # first layer: histogram
+  geom_histogram(bins = 6, # according to Rice Rule
+                 color = "black") + # outline
+  facet_wrap( ~ exercise_type) + # separate plots by exercise type
+  # non-default theme
   theme_minimal()
 ```
 
